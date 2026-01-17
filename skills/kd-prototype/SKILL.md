@@ -1,5 +1,5 @@
 ---
-name: prototype
+name: kd:prototype
 description: Core orchestration for rapid prototype workflow - manages state and stage execution
 ---
 

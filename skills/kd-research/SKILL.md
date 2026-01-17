@@ -1,9 +1,9 @@
-# Deep Research Assistant Skill
-
+---
 name: kd:research
 description: Autonomous multi-source research tool that synthesizes findings into structured reports with BLUF, key concepts, and citations. Fire-and-forget workflow with OneDrive integration for mobile access.
-
 ---
+
+# Deep Research Assistant Skill
 
 ## Overview
 
