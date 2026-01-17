@@ -17,8 +17,7 @@
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true,
     "episodic-memory@superpowers-marketplace": true,
-    "hookify@claude-plugins-official": true,
-    "voicemode@mbailey": true
+    "hookify@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true
 }
