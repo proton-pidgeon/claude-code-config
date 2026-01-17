@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "# Add host-specific permissions here",
+      "# Example: Bash(npm install:*)",
+      "# Example: Bash(docker:*)"
+    ]
+  },
+  "description": "Host-specific settings template. Copy to settings.local.json on each host and customize as needed. This file is not synced to avoid conflicts."
+}

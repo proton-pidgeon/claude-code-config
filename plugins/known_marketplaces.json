@@ -1,0 +1,26 @@
+{
+  "claude-plugins-official": {
+    "source": {
+      "source": "github",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    "installLocation": "C:\\Users\\kevdu\\.claude\\plugins\\marketplaces\\claude-plugins-official",
+    "lastUpdated": "2026-01-17T13:25:08.807Z"
+  },
+  "superpowers-marketplace": {
+    "source": {
+      "source": "github",
+      "repo": "obra/superpowers-marketplace"
+    },
+    "installLocation": "C:\\Users\\kevdu\\.claude\\plugins\\marketplaces\\superpowers-marketplace",
+    "lastUpdated": "2026-01-15T03:08:04.113Z"
+  },
+  "mbailey": {
+    "source": {
+      "source": "git",
+      "url": "https://github.com/mbailey/claude-plugins.git"
+    },
+    "installLocation": "C:\\Users\\kevdu\\.claude\\plugins\\marketplaces\\mbailey",
+    "lastUpdated": "2026-01-15T15:41:54.856Z"
+  }
+}

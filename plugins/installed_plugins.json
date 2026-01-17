@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "plugins": {
+    "superpowers@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\kevdu\\.claude\\plugins\\cache\\claude-plugins-official\\superpowers\\4.0.3",
+        "version": "4.0.3",
+        "installedAt": "2026-01-15T03:08:18.458Z",
+        "lastUpdated": "2026-01-15T03:08:18.458Z",
+        "gitCommitSha": "a08f088968d0789a44a4f5f5f7d8d6bbe46a0b44"
+      }
+    ],
+    "episodic-memory@superpowers-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\kevdu\\.claude\\plugins\\cache\\superpowers-marketplace\\episodic-memory\\1.0.15",
+        "version": "1.0.15",
+        "installedAt": "2026-01-15T03:10:09.739Z",
+        "lastUpdated": "2026-01-15T03:10:09.739Z",
+        "gitCommitSha": "6feaa5bd8752ae104c88d251e68ce19c30a1bd2f"
+      }
+    ],
+    "hookify@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\kevdu\\.claude\\plugins\\cache\\claude-plugins-official\\hookify\\96276205880a",
+        "version": "96276205880a",
+        "installedAt": "2026-01-15T03:24:50.187Z",
+        "lastUpdated": "2026-01-15T23:19:16.521Z",
+        "gitCommitSha": "ee2f7266264580ef92b04e6d02980396e0336fb5"
+      }
+    ],
+    "voicemode@mbailey": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\kevdu\\.claude\\plugins\\cache\\mbailey\\voicemode\\7.4.0p3",
+        "version": "7.4.0p3",
+        "installedAt": "2026-01-15T15:42:03.585Z",
+        "lastUpdated": "2026-01-15T15:42:03.585Z",
+        "gitCommitSha": "f5bcce749d1203ca282aa5104e10f505edeb17f5"
+      }
+    ]
+  }
+}

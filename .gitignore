@@ -1,0 +1,45 @@
+# Credentials - NEVER sync these
+.credentials.json
+.credentials.*.json
+credentials.json
+
+# Generated caches and downloads
+plugins/cache/
+plugins/marketplaces/
+cache/
+debug/
+telemetry/
+shell-snapshots/
+file-history/
+session-env/
+stats-cache.json
+statsig/
+
+# Host-specific session data (large)
+projects/
+plans/
+prototypes/
+todos/
+
+# Generated voice files (large)
+piper-voices/
+
+# Host-specific settings (has a template instead)
+settings.local.json
+
+# System files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.bak
+.update.lock

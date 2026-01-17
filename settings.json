@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(pipx --version:*)",
+      "Bash(pip3 --version:*)",
+      "Bash(pip --version:*)",
+      "Bash(pip install:*)",
+      "Bash(python -m pipx:*)",
+      "WebSearch",
+      "Bash(npx --version)",
+      "mcp__plugin_episodic-memory_episodic-memory__search"
+    ],
+    "defaultMode": "default"
+  },
+  "model": "haiku",
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "episodic-memory@superpowers-marketplace": true,
+    "hookify@claude-plugins-official": true,
+    "voicemode@mbailey": true
+  },
+  "alwaysThinkingEnabled": true
+}
