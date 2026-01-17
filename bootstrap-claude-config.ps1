@@ -480,24 +480,19 @@ function Bootstrap-ClaudeConfig {
 Write-Host "Installing Claude plugins..." -ForegroundColor Green
 Write-Host ""
 
-try {
-    $pluginsJson = Get-Content "$HOME\.claude\plugins\installed_plugins.json" -ErrorAction SilentlyContinue | ConvertFrom-Json
-    $plugins = $pluginsJson.plugins.psobject.properties.name
+$plugins = @(
+    "episodic-memory@superpowers-marketplace",
+    "hookify@claude-plugins-official",
+    "superpowers@claude-plugins-official"
+)
 
-    foreach ($plugin in $plugins) {
-        Write-Host "Installing: $plugin"
-        claude plugin install $plugin
-    }
-    Write-Host ""
-    Write-Host "✓ All plugins installed successfully" -ForegroundColor Green
+foreach ($plugin in $plugins) {
+    Write-Host "Installing: $plugin"
+    claude plugin install $plugin
 }
-catch {
-    Write-Host "Error reading plugins or jq not available. Please install plugins manually:" -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "  claude plugin install episodic-memory@superpowers-marketplace"
-    Write-Host "  claude plugin install hookify@claude-plugins-official"
-    Write-Host "  claude plugin install superpowers@claude-plugins-official"
-}
+
+Write-Host ""
+Write-Host "✓ All plugins installed successfully" -ForegroundColor Green
 '@
         Set-Content -Path $pluginInstallScript -Value $scriptContent
         Write-ColorOutput "✓ Generated plugin installation script" "Green"

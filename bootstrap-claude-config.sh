@@ -485,23 +485,20 @@ set -e
 echo "Installing Claude plugins..."
 echo ""
 
-# Extract and install plugins from installed_plugins.json
-if command -v jq &> /dev/null; then
-  plugins=$(jq -r '.plugins | to_entries[] | .key' "$HOME/.claude/plugins/installed_plugins.json" 2>/dev/null || echo "")
-  for plugin in $plugins; do
-    echo "Installing: $plugin"
-    claude plugin install "$plugin"
-  done
-  echo ""
-  echo "✓ All plugins installed successfully"
-else
-  # Fallback if jq is not available
-  echo "jq not found. Please install plugins manually:"
-  echo ""
-  echo "  claude plugin install episodic-memory@superpowers-marketplace"
-  echo "  claude plugin install hookify@claude-plugins-official"
-  echo "  claude plugin install superpowers@claude-plugins-official"
-fi
+# List of plugins to install
+declare -a PLUGINS=(
+  "episodic-memory@superpowers-marketplace"
+  "hookify@claude-plugins-official"
+  "superpowers@claude-plugins-official"
+)
+
+for plugin in "${PLUGINS[@]}"; do
+  echo "Installing: $plugin"
+  claude plugin install "$plugin"
+done
+
+echo ""
+echo "✓ All plugins installed successfully"
 EOF
   chmod +x "$PLUGIN_INSTALL_SCRIPT"
   echo -e "${GREEN}✓ Generated plugin installation script${NC}"
