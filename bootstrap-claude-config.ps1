@@ -418,7 +418,7 @@ function Bootstrap-ClaudeConfig {
     if ($SelectedAgents.Count -gt 0) {
         Write-ColorOutput "Installing agents:" "Green"
         foreach ($agent in $SelectedAgents) {
-            $sourceFile = Join-Path $TempCloneDir "agents" $agent.FileName
+            $sourceFile = Join-Path (Join-Path $TempCloneDir "agents") $agent.FileName
             Copy-Item -Path $sourceFile -Destination (Join-Path $ClaudeConfigDir "agents") -ErrorAction SilentlyContinue
             Write-ColorOutput "  ✓ $($agent.Name)" "Green"
         }
@@ -430,10 +430,10 @@ function Bootstrap-ClaudeConfig {
         foreach ($skill in $SelectedSkills) {
             if ($skill.Type -eq "Directory") {
                 # Multi-directory skill
-                $sourceSkillDir = Join-Path $TempCloneDir "skills" $skill.Id
+                $sourceSkillDir = Join-Path (Join-Path $TempCloneDir "skills") $skill.Id
                 Copy-Item -Path $sourceSkillDir -Destination (Join-Path $ClaudeConfigDir "skills") -Recurse -ErrorAction SilentlyContinue
 
-                $sourceCommandDir = Join-Path $TempCloneDir "commands" $skill.Id
+                $sourceCommandDir = Join-Path (Join-Path $TempCloneDir "commands") $skill.Id
                 if (Test-Path $sourceCommandDir) {
                     Copy-Item -Path $sourceCommandDir -Destination (Join-Path $ClaudeConfigDir "commands") -Recurse -ErrorAction SilentlyContinue
                 }
@@ -441,7 +441,7 @@ function Bootstrap-ClaudeConfig {
             }
             else {
                 # Single-file skill
-                $sourceFile = Join-Path $TempCloneDir "skills" $skill.Id
+                $sourceFile = Join-Path (Join-Path $TempCloneDir "skills") $skill.Id
                 Copy-Item -Path $sourceFile -Destination (Join-Path $ClaudeConfigDir "skills") -ErrorAction SilentlyContinue
                 Write-ColorOutput "  ✓ $($skill.Name)" "Green"
             }
@@ -452,7 +452,7 @@ function Bootstrap-ClaudeConfig {
     if ($SelectedCommandsSC.Count -gt 0) {
         Write-ColorOutput "Installing SuperClaude commands:" "Green"
         foreach ($cmd in $SelectedCommandsSC) {
-            $sourceFile = Join-Path $TempCloneDir "commands\sc" $cmd.FileName
+            $sourceFile = Join-Path (Join-Path $TempCloneDir "commands" "sc") $cmd.FileName
             Copy-Item -Path $sourceFile -Destination (Join-Path $ClaudeConfigDir "commands\sc") -ErrorAction SilentlyContinue
             Write-ColorOutput "  ✓ $($cmd.Name)" "Green"
         }
@@ -462,7 +462,7 @@ function Bootstrap-ClaudeConfig {
     if ($SelectedCommandsPrototype.Count -gt 0) {
         Write-ColorOutput "Installing kd:prototype commands:" "Green"
         foreach ($cmd in $SelectedCommandsPrototype) {
-            $sourceFile = Join-Path $TempCloneDir "commands\kd-prototype" $cmd.FileName
+            $sourceFile = Join-Path (Join-Path $TempCloneDir "commands" "kd-prototype") $cmd.FileName
             Copy-Item -Path $sourceFile -Destination (Join-Path $ClaudeConfigDir "commands\kd-prototype") -ErrorAction SilentlyContinue
             Write-ColorOutput "  ✓ $($cmd.Name)" "Green"
         }
