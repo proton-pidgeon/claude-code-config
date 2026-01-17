@@ -384,9 +384,13 @@ select_category_items "Skills" "$CLAUDE_CONFIG_DIR/skills" AVAILABLE_SKILLS SELE
 select_category_items "SuperClaude Commands (sc)" "$CLAUDE_CONFIG_DIR/commands/sc" AVAILABLE_COMMANDS_SC SELECTED_COMMANDS_SC
 select_category_items "Prototype Commands" "$CLAUDE_CONFIG_DIR/commands/prototype" AVAILABLE_COMMANDS_PROTOTYPE SELECTED_COMMANDS_PROTOTYPE
 
-# Create fresh .claude directory structure
+# Backup the entire cloned repo for source files
+TEMP_CLONE_DIR="/tmp/claude-clone-backup-$$"
+cp -r "$CLAUDE_CONFIG_DIR" "$TEMP_CLONE_DIR"
+
+# Create fresh directory structure (keep only .git and config files)
 echo ""
-echo -e "${BLUE}Creating directory structure...${NC}"
+echo -e "${BLUE}Installing selected items...${NC}"
 mkdir -p "$CLAUDE_CONFIG_DIR/agents"
 mkdir -p "$CLAUDE_CONFIG_DIR/skills"
 mkdir -p "$CLAUDE_CONFIG_DIR/commands/sc"
@@ -401,24 +405,13 @@ rm -rf "$CLAUDE_CONFIG_DIR/skills"/*/ 2>/dev/null || true
 rm -rf "$CLAUDE_CONFIG_DIR/commands/sc"/*.md
 rm -rf "$CLAUDE_CONFIG_DIR/commands/prototype"/*.md
 
-# Recreate directories
-mkdir -p "$CLAUDE_CONFIG_DIR/agents"
-mkdir -p "$CLAUDE_CONFIG_DIR/skills"
-mkdir -p "$CLAUDE_CONFIG_DIR/commands/sc"
-mkdir -p "$CLAUDE_CONFIG_DIR/commands/prototype"
-
-# Stash the original .git directory
-TEMP_GIT_DIR="/tmp/claude-git-backup-$$"
-mv "$CLAUDE_CONFIG_DIR/.git" "$TEMP_GIT_DIR" 2>/dev/null || true
-
 # Install selected agents
 if [ ${#SELECTED_AGENTS[@]} -gt 0 ]; then
-  echo -e "${BLUE}Installing agents:${NC}"
+  echo -e "${GREEN}Installing agents:${NC}"
   for item in "${SELECTED_AGENTS[@]}"; do
     local name=$(echo "$item" | cut -d':' -f1)
     local file=$(echo "$item" | cut -d':' -f2)
-    # Find the source file in the original cloned content
-    local source_file=$(find "$TEMP_GIT_DIR" -name "$file" 2>/dev/null | head -1)
+    local source_file="$TEMP_CLONE_DIR/agents/$file"
     if [ -f "$source_file" ]; then
       cp "$source_file" "$CLAUDE_CONFIG_DIR/agents/"
       echo -e "${GREEN}  ✓ $name${NC}"
@@ -428,21 +421,21 @@ fi
 
 # Install selected skills
 if [ ${#SELECTED_SKILLS[@]} -gt 0 ]; then
-  echo -e "${BLUE}Installing skills:${NC}"
+  echo -e "${GREEN}Installing skills:${NC}"
   for item in "${SELECTED_SKILLS[@]}"; do
     local name=$(echo "$item" | cut -d':' -f1)
     local skill_id=$(echo "$item" | cut -d':' -f2)
 
     # Check if it's a multi-directory skill (skill_id is just the dir name without extension)
-    if [ -d "$TEMP_GIT_DIR/skills/$skill_id" ]; then
-      cp -r "$TEMP_GIT_DIR/skills/$skill_id" "$CLAUDE_CONFIG_DIR/skills/" 2>/dev/null
-      if [ -d "$TEMP_GIT_DIR/commands/$skill_id" ]; then
-        cp -r "$TEMP_GIT_DIR/commands/$skill_id" "$CLAUDE_CONFIG_DIR/commands/" 2>/dev/null
+    if [ -d "$TEMP_CLONE_DIR/skills/$skill_id" ]; then
+      cp -r "$TEMP_CLONE_DIR/skills/$skill_id" "$CLAUDE_CONFIG_DIR/skills/" 2>/dev/null
+      if [ -d "$TEMP_CLONE_DIR/commands/$skill_id" ]; then
+        cp -r "$TEMP_CLONE_DIR/commands/$skill_id" "$CLAUDE_CONFIG_DIR/commands/" 2>/dev/null
       fi
       echo -e "${GREEN}  ✓ $name (package)${NC}"
-    elif [ -f "$TEMP_GIT_DIR/skills/$skill_id" ]; then
+    elif [ -f "$TEMP_CLONE_DIR/skills/$skill_id" ]; then
       # Single-file skill (skill_id already includes .md extension)
-      cp "$TEMP_GIT_DIR/skills/$skill_id" "$CLAUDE_CONFIG_DIR/skills/"
+      cp "$TEMP_CLONE_DIR/skills/$skill_id" "$CLAUDE_CONFIG_DIR/skills/"
       echo -e "${GREEN}  ✓ $name${NC}"
     fi
   done
@@ -450,11 +443,11 @@ fi
 
 # Install selected SC commands
 if [ ${#SELECTED_COMMANDS_SC[@]} -gt 0 ]; then
-  echo -e "${BLUE}Installing SuperClaude commands:${NC}"
+  echo -e "${GREEN}Installing SuperClaude commands:${NC}"
   for item in "${SELECTED_COMMANDS_SC[@]}"; do
     local name=$(echo "$item" | cut -d':' -f1)
     local file=$(echo "$item" | cut -d':' -f2)
-    local source_file="$TEMP_GIT_DIR/commands/sc/$file"
+    local source_file="$TEMP_CLONE_DIR/commands/sc/$file"
     if [ -f "$source_file" ]; then
       cp "$source_file" "$CLAUDE_CONFIG_DIR/commands/sc/"
       echo -e "${GREEN}  ✓ $name${NC}"
@@ -464,11 +457,11 @@ fi
 
 # Install selected Prototype commands
 if [ ${#SELECTED_COMMANDS_PROTOTYPE[@]} -gt 0 ]; then
-  echo -e "${BLUE}Installing Prototype commands:${NC}"
+  echo -e "${GREEN}Installing Prototype commands:${NC}"
   for item in "${SELECTED_COMMANDS_PROTOTYPE[@]}"; do
     local name=$(echo "$item" | cut -d':' -f1)
     local file=$(echo "$item" | cut -d':' -f2)
-    local source_file="$TEMP_GIT_DIR/commands/prototype/$file"
+    local source_file="$TEMP_CLONE_DIR/commands/prototype/$file"
     if [ -f "$source_file" ]; then
       cp "$source_file" "$CLAUDE_CONFIG_DIR/commands/prototype/"
       echo -e "${GREEN}  ✓ $name${NC}"
@@ -476,9 +469,8 @@ if [ ${#SELECTED_COMMANDS_PROTOTYPE[@]} -gt 0 ]; then
   done
 fi
 
-# Restore .git directory
-rm -rf "$CLAUDE_CONFIG_DIR/.git"
-mv "$TEMP_GIT_DIR" "$CLAUDE_CONFIG_DIR/.git" 2>/dev/null || true
+# Cleanup temporary backup
+rm -rf "$TEMP_CLONE_DIR"
 
 echo -e "${GREEN}✓ Items installed${NC}"
 
