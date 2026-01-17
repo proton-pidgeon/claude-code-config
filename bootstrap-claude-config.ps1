@@ -36,6 +36,236 @@ function Write-ColorOutput {
     Write-Host $Message -ForegroundColor $Color
 }
 
+# ============================================
+# Utility Functions for Item Discovery
+# ============================================
+
+# Extract YAML field from frontmatter
+function Get-YamlField {
+    param(
+        [string]$FilePath,
+        [string]$Field
+    )
+
+    if (-not (Test-Path $FilePath)) {
+        return $null
+    }
+
+    $content = Get-Content -Path $FilePath -Raw
+
+    # Extract content between --- markers
+    if ($content -match "(?s)^---\r?\n(.*?)\r?\n---") {
+        $frontmatter = $Matches[1]
+
+        # Find the field
+        foreach ($line in $frontmatter -split "`n") {
+            $escapedField = [regex]::Escape($Field)
+            if ($line -match "^$escapedField`:\s*`"?(.+?)`"?\s*$") {
+                return $Matches[1].Trim()
+            }
+        }
+    }
+    return $null
+}
+
+# Get display name for an item (name - description)
+function Get-ItemDisplay {
+    param([string]$FilePath)
+
+    $name = Get-YamlField -FilePath $FilePath -Field "name"
+    $desc = Get-YamlField -FilePath $FilePath -Field "description"
+
+    if ($desc -and $desc.Length -gt 70) {
+        $desc = $desc.Substring(0, 70)
+    }
+
+    if ($name) {
+        return "$name - $desc"
+    }
+    return (Split-Path -Leaf $FilePath)
+}
+
+# Parse all items in directory into hashtable
+function Get-AvailableItems {
+    param(
+        [string]$DirectoryPath
+    )
+
+    $items = @()
+
+    if (-not (Test-Path $DirectoryPath)) {
+        return $items
+    }
+
+    Get-ChildItem -Path $DirectoryPath -Filter "*.md" | ForEach-Object {
+        $name = Get-YamlField -FilePath $_.FullName -Field "name"
+        $display = Get-ItemDisplay -FilePath $_.FullName
+        if ($name) {
+            $items += @{
+                Name = $name
+                FileName = $_.Name
+                Display = $display
+            }
+        }
+    }
+
+    return $items
+}
+
+# Parse skills (handles both single files and directories)
+function Get-AvailableSkills {
+    param([string]$DirectoryPath)
+
+    $items = @()
+
+    if (-not (Test-Path $DirectoryPath)) {
+        return $items
+    }
+
+    # Single-file skills
+    Get-ChildItem -Path $DirectoryPath -Filter "*.md" | ForEach-Object {
+        $name = Get-YamlField -FilePath $_.FullName -Field "name"
+        $display = Get-ItemDisplay -FilePath $_.FullName
+        if ($name) {
+            $items += @{
+                Name = $name
+                Id = $_.Name
+                Display = $display
+                Type = "File"
+            }
+        }
+    }
+
+    # Multi-directory skills
+    Get-ChildItem -Path $DirectoryPath -Directory | ForEach-Object {
+        $skillMdPath = Join-Path $_.FullName "SKILL.md"
+        if (Test-Path $skillMdPath) {
+            $name = Get-YamlField -FilePath $skillMdPath -Field "name"
+            $display = Get-ItemDisplay -FilePath $skillMdPath
+            if ($name) {
+                $items += @{
+                    Name = $name
+                    Id = $_.Name
+                    Display = $display
+                    Type = "Directory"
+                }
+            }
+        }
+    }
+
+    return $items
+}
+
+# ============================================
+# Interactive Selection Functions
+# ============================================
+
+# Multi-select menu with numbered items
+function Select-InteractiveItems {
+    param(
+        [string]$Prompt,
+        [array]$Items
+    )
+
+    $selected = @()
+    $state = @{}
+
+    # Initialize all states to false
+    for ($i = 0; $i -lt $Items.Count; $i++) {
+        $state[$i] = $false
+    }
+
+    while ($true) {
+        Clear-Host
+        Write-ColorOutput $Prompt "Cyan"
+        Write-Host "Use numbers to toggle, 'a' for all, 'n' for none, 'd' when done:"
+        Write-Host ""
+
+        for ($i = 0; $i -lt $Items.Count; $i++) {
+            $checkbox = if ($state[$i]) { "[x]" } else { "[ ]" }
+            Write-Host "  $($i+1). $checkbox $($Items[$i].Display)"
+        }
+
+        Write-Host ""
+        $choice = Read-Host "Selection (1-$($Items.Count), a/n/d)"
+
+        switch ($choice.ToLower()) {
+            'a' {
+                for ($i = 0; $i -lt $Items.Count; $i++) {
+                    $state[$i] = $true
+                }
+            }
+            'n' {
+                for ($i = 0; $i -lt $Items.Count; $i++) {
+                    $state[$i] = $false
+                }
+            }
+            'd' { break }
+            default {
+                if ($choice -match '^\d+$') {
+                    $idx = [int]$choice - 1
+                    if ($idx -ge 0 -and $idx -lt $Items.Count) {
+                        $state[$idx] = -not $state[$idx]
+                    }
+                }
+            }
+        }
+    }
+
+    # Build selected array
+    for ($i = 0; $i -lt $Items.Count; $i++) {
+        if ($state[$i]) {
+            $selected += $Items[$i]
+        }
+    }
+
+    return $selected
+}
+
+# Category selection menu
+function Select-CategoryItems {
+    param(
+        [string]$Category,
+        [array]$Items
+    )
+
+    $selected = @()
+
+    if ($Items.Count -eq 0) {
+        Write-ColorOutput "No $Category available" "Yellow"
+        return $selected
+    }
+
+    Write-Host ""
+    Write-ColorOutput "$Category Selection" "Cyan"
+    Write-Host "Found $($Items.Count) available"
+    Write-Host ""
+    Write-Host "  1. Install all"
+    Write-Host "  2. Skip all"
+    Write-Host "  3. Choose individually"
+    Write-Host ""
+
+    $choice = Read-Host "Your choice (1-3)"
+
+    switch ($choice) {
+        '1' {
+            $selected = $Items
+            Write-ColorOutput "✓ Selected all $Category" "Green"
+        }
+        '2' {
+            Write-ColorOutput "Skipped $Category" "Yellow"
+        }
+        '3' {
+            $selected = Select-InteractiveItems -Prompt "Choose $Category" -Items $Items
+        }
+        default {
+            Write-ColorOutput "Invalid choice, skipping $Category" "Yellow"
+        }
+    }
+
+    return $selected
+}
+
 # Main bootstrap function
 function Bootstrap-ClaudeConfig {
     param([string]$RepoUrl)
@@ -56,8 +286,8 @@ function Bootstrap-ClaudeConfig {
     Write-Host ""
     Write-Host "This script will:"
     Write-Host "  • Clone your Claude Code configuration from: $RepoUrl"
+    Write-Host "  • Let you interactively choose which agents, skills, and commands to install"
     Write-Host "  • Set up configuration in: $ClaudeConfigDir"
-    Write-Host "  • Create required directories (agents, skills, commands, etc.)"
     Write-Host "  • Preserve any existing credentials"
     Write-Host ""
     $response = Read-Host "Do you want to continue? (y/n)"
@@ -139,17 +369,106 @@ function Bootstrap-ClaudeConfig {
         }
     }
 
-    # Step 5: Create required directories if missing
+    # Step 5: Interactive selection of items to install
     Write-Host ""
-    Write-ColorOutput "Creating required directories..." "Blue"
-    $directories = @("agents", "skills", "commands", "plugins", "ide")
+    Write-ColorOutput "Selecting items to install..." "Blue"
+
+    # Parse available items from cloned repository
+    $AvailableAgents = Get-AvailableItems -DirectoryPath (Join-Path $ClaudeConfigDir "agents")
+    $AvailableSkills = Get-AvailableSkills -DirectoryPath (Join-Path $ClaudeConfigDir "skills")
+    $AvailableCommandsSC = Get-AvailableItems -DirectoryPath (Join-Path $ClaudeConfigDir "commands\sc")
+    $AvailableCommandsPrototype = Get-AvailableItems -DirectoryPath (Join-Path $ClaudeConfigDir "commands\prototype")
+
+    # Get user selections
+    $SelectedAgents = Select-CategoryItems -Category "Agents" -Items $AvailableAgents
+    $SelectedSkills = Select-CategoryItems -Category "Skills" -Items $AvailableSkills
+    $SelectedCommandsSC = Select-CategoryItems -Category "SuperClaude Commands (sc)" -Items $AvailableCommandsSC
+    $SelectedCommandsPrototype = Select-CategoryItems -Category "Prototype Commands" -Items $AvailableCommandsPrototype
+
+    # Backup the entire cloned repo for source files
+    $TempCloneDir = Join-Path $env:TEMP "claude-clone-backup-$(Get-Random)"
+    Copy-Item -Path $ClaudeConfigDir -Destination $TempCloneDir -Recurse
+
+    # Create fresh directory structure
+    Write-Host ""
+    Write-ColorOutput "Installing selected items..." "Blue"
+    $directories = @(
+        (Join-Path $ClaudeConfigDir "agents"),
+        (Join-Path $ClaudeConfigDir "skills"),
+        (Join-Path $ClaudeConfigDir "commands\sc"),
+        (Join-Path $ClaudeConfigDir "commands\prototype"),
+        (Join-Path $ClaudeConfigDir "plugins"),
+        (Join-Path $ClaudeConfigDir "ide")
+    )
     foreach ($dir in $directories) {
-        $dirPath = Join-Path $ClaudeConfigDir $dir
-        if (-not (Test-Path $dirPath)) {
-            New-Item -Path $dirPath -ItemType Directory -Force | Out-Null
+        New-Item -Path $dir -ItemType Directory -Force | Out-Null
+    }
+
+    # Remove all existing items from cloned repo (we'll install selected ones)
+    Remove-Item -Path (Join-Path $ClaudeConfigDir "agents\*.md") -ErrorAction SilentlyContinue
+    Remove-Item -Path (Join-Path $ClaudeConfigDir "skills\*.md") -ErrorAction SilentlyContinue
+    Remove-Item -Path (Join-Path $ClaudeConfigDir "skills\*") -Directory -ErrorAction SilentlyContinue
+    Remove-Item -Path (Join-Path $ClaudeConfigDir "commands\sc\*.md") -ErrorAction SilentlyContinue
+    Remove-Item -Path (Join-Path $ClaudeConfigDir "commands\prototype\*.md") -ErrorAction SilentlyContinue
+
+    # Install selected agents
+    if ($SelectedAgents.Count -gt 0) {
+        Write-ColorOutput "Installing agents:" "Green"
+        foreach ($agent in $SelectedAgents) {
+            $sourceFile = Join-Path $TempCloneDir "agents" $agent.FileName
+            Copy-Item -Path $sourceFile -Destination (Join-Path $ClaudeConfigDir "agents") -ErrorAction SilentlyContinue
+            Write-ColorOutput "  ✓ $($agent.Name)" "Green"
         }
     }
-    Write-ColorOutput "✓ Directories created" "Green"
+
+    # Install selected skills
+    if ($SelectedSkills.Count -gt 0) {
+        Write-ColorOutput "Installing skills:" "Green"
+        foreach ($skill in $SelectedSkills) {
+            if ($skill.Type -eq "Directory") {
+                # Multi-directory skill
+                $sourceSkillDir = Join-Path $TempCloneDir "skills" $skill.Id
+                Copy-Item -Path $sourceSkillDir -Destination (Join-Path $ClaudeConfigDir "skills") -Recurse -ErrorAction SilentlyContinue
+
+                $sourceCommandDir = Join-Path $TempCloneDir "commands" $skill.Id
+                if (Test-Path $sourceCommandDir) {
+                    Copy-Item -Path $sourceCommandDir -Destination (Join-Path $ClaudeConfigDir "commands") -Recurse -ErrorAction SilentlyContinue
+                }
+                Write-ColorOutput "  ✓ $($skill.Name) (package)" "Green"
+            }
+            else {
+                # Single-file skill
+                $sourceFile = Join-Path $TempCloneDir "skills" $skill.Id
+                Copy-Item -Path $sourceFile -Destination (Join-Path $ClaudeConfigDir "skills") -ErrorAction SilentlyContinue
+                Write-ColorOutput "  ✓ $($skill.Name)" "Green"
+            }
+        }
+    }
+
+    # Install selected SC commands
+    if ($SelectedCommandsSC.Count -gt 0) {
+        Write-ColorOutput "Installing SuperClaude commands:" "Green"
+        foreach ($cmd in $SelectedCommandsSC) {
+            $sourceFile = Join-Path $TempCloneDir "commands\sc" $cmd.FileName
+            Copy-Item -Path $sourceFile -Destination (Join-Path $ClaudeConfigDir "commands\sc") -ErrorAction SilentlyContinue
+            Write-ColorOutput "  ✓ $($cmd.Name)" "Green"
+        }
+    }
+
+    # Install selected Prototype commands
+    if ($SelectedCommandsPrototype.Count -gt 0) {
+        Write-ColorOutput "Installing Prototype commands:" "Green"
+        foreach ($cmd in $SelectedCommandsPrototype) {
+            $sourceFile = Join-Path $TempCloneDir "commands\prototype" $cmd.FileName
+            Copy-Item -Path $sourceFile -Destination (Join-Path $ClaudeConfigDir "commands\prototype") -ErrorAction SilentlyContinue
+            Write-ColorOutput "  ✓ $($cmd.Name)" "Green"
+        }
+    }
+
+    # Cleanup temporary backup
+    Remove-Item -Path $TempCloneDir -Recurse -Force -ErrorAction SilentlyContinue
+
+    Write-ColorOutput "✓ Items installed" "Green"
 
     # Step 6: Verify Git setup
     Write-Host ""
@@ -177,6 +496,13 @@ function Bootstrap-ClaudeConfig {
     Write-ColorOutput "Bootstrap Complete!" "Blue"
     Write-ColorOutput "=====================================" "Blue"
     Write-Host ""
+    Write-ColorOutput "Installation Summary:" "Green"
+    Write-Host ""
+    Write-Host "  Agents installed:       $($SelectedAgents.Count)"
+    Write-Host "  Skills installed:       $($SelectedSkills.Count)"
+    Write-Host "  SC commands installed:  $($SelectedCommandsSC.Count)"
+    Write-Host "  Prototype commands:     $($SelectedCommandsPrototype.Count)"
+    Write-Host ""
     Write-ColorOutput "Next Steps:" "Green"
     Write-Host ""
     Write-Host "1. Review host-specific settings:"
@@ -185,10 +511,7 @@ function Bootstrap-ClaudeConfig {
     Write-Host "2. Authenticate with Claude:"
     Write-Host "   claude auth login"
     Write-Host ""
-    Write-Host "3. Verify plugins:"
-    Write-Host "   claude plugin list"
-    Write-Host ""
-    Write-Host "4. Check configuration:"
+    Write-Host "3. Verify your installation:"
     Write-Host "   cd $ClaudeConfigDir"
     Write-Host "   git status"
     Write-Host ""
