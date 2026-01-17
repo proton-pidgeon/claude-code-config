@@ -58,6 +58,16 @@ fi
 echo -e "${BLUE}Claude Code Configuration Bootstrap${NC}"
 echo "===================================="
 echo ""
+echo "This script will:"
+echo "  • Clone your Claude Code configuration from: $REPO_URL"
+echo "  • Set up configuration in: $CLAUDE_CONFIG_DIR"
+echo "  • Create required directories (agents, skills, commands, etc.)"
+echo "  • Preserve any existing credentials"
+echo ""
+echo -n "Do you want to continue? (y/n) "
+read -r response < /dev/tty
+[[ "$response" =~ ^[Yy]$ ]] || { echo -e "${RED}Bootstrap cancelled${NC}"; exit 0; }
+echo ""
 
 # Step 1: Check for existing .claude directory
 if [ -d "$CLAUDE_CONFIG_DIR" ]; then

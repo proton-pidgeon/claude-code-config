@@ -54,6 +54,18 @@ function Bootstrap-ClaudeConfig {
     Write-ColorOutput "Claude Code Configuration Bootstrap" "Blue"
     Write-ColorOutput "====================================" "Blue"
     Write-Host ""
+    Write-Host "This script will:"
+    Write-Host "  • Clone your Claude Code configuration from: $RepoUrl"
+    Write-Host "  • Set up configuration in: $ClaudeConfigDir"
+    Write-Host "  • Create required directories (agents, skills, commands, etc.)"
+    Write-Host "  • Preserve any existing credentials"
+    Write-Host ""
+    $response = Read-Host "Do you want to continue? (y/n)"
+
+    if ($response -notmatch '^[Yy]$') {
+        Write-ColorOutput "Bootstrap cancelled" "Red"
+        exit 0
+    }
 
     # Step 1: Check for existing .claude directory
     if (Test-Path $ClaudeConfigDir) {
