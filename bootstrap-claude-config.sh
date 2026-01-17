@@ -63,7 +63,7 @@ echo ""
 if [ -d "$CLAUDE_CONFIG_DIR" ]; then
   echo -e "${YELLOW}Found existing .claude directory${NC}"
   echo -n "Backup existing configuration to $BACKUP_DIR? (y/n) "
-  read -r response
+  read -r response < /dev/tty
   if [[ "$response" =~ ^[Yy]$ ]]; then
     cp -r "$CLAUDE_CONFIG_DIR" "$BACKUP_DIR"
     echo -e "${GREEN}✓ Backed up to $BACKUP_DIR${NC}"
@@ -75,7 +75,7 @@ if [ -d "$CLAUDE_CONFIG_DIR" ]; then
     fi
   else
     echo -n "Remove existing .claude directory? (y/n) "
-    read -r response
+    read -r response < /dev/tty
     if [[ "$response" =~ ^[Yy]$ ]]; then
       rm -rf "$CLAUDE_CONFIG_DIR"
       echo -e "${GREEN}✓ Removed existing directory${NC}"
