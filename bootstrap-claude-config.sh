@@ -138,7 +138,7 @@ multi_select_menu() {
         for ((i=0; i<${#options[@]}; i++)); do state[$i]=0; done
         ;;
       d|D)
-        break
+        break 2
         ;;
       [0-9]*)
         if [ "$choice" -ge 1 ] && [ "$choice" -le "${#options[@]}" ]; then

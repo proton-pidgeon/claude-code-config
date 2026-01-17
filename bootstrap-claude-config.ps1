@@ -175,7 +175,8 @@ function Select-InteractiveItems {
         $state[$i] = $false
     }
 
-    while ($true) {
+    $done = $false
+    while (-not $done) {
         Clear-Host
         Write-ColorOutput $Prompt "Cyan"
         Write-Host "Use numbers to toggle, 'a' for all, 'n' for none, 'd' when done:"
@@ -200,7 +201,9 @@ function Select-InteractiveItems {
                     $state[$i] = $false
                 }
             }
-            'd' { break }
+            'd' {
+                $done = $true
+            }
             default {
                 if ($choice -match '^\d+$') {
                     $idx = [int]$choice - 1
