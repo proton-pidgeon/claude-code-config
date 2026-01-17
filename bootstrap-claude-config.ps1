@@ -452,7 +452,7 @@ function Bootstrap-ClaudeConfig {
     if ($SelectedCommandsSC.Count -gt 0) {
         Write-ColorOutput "Installing SuperClaude commands:" "Green"
         foreach ($cmd in $SelectedCommandsSC) {
-            $sourceFile = Join-Path (Join-Path $TempCloneDir "commands" "sc") $cmd.FileName
+            $sourceFile = Join-Path (Join-Path (Join-Path $TempCloneDir "commands") "sc") $cmd.FileName
             Copy-Item -Path $sourceFile -Destination (Join-Path $ClaudeConfigDir "commands\sc") -ErrorAction SilentlyContinue
             Write-ColorOutput "  ✓ $($cmd.Name)" "Green"
         }
@@ -462,7 +462,7 @@ function Bootstrap-ClaudeConfig {
     if ($SelectedCommandsPrototype.Count -gt 0) {
         Write-ColorOutput "Installing kd:prototype commands:" "Green"
         foreach ($cmd in $SelectedCommandsPrototype) {
-            $sourceFile = Join-Path (Join-Path $TempCloneDir "commands" "kd-prototype") $cmd.FileName
+            $sourceFile = Join-Path (Join-Path (Join-Path $TempCloneDir "commands") "kd-prototype") $cmd.FileName
             Copy-Item -Path $sourceFile -Destination (Join-Path $ClaudeConfigDir "commands\kd-prototype") -ErrorAction SilentlyContinue
             Write-ColorOutput "  ✓ $($cmd.Name)" "Green"
         }
