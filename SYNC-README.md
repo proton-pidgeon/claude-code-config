@@ -10,6 +10,7 @@ This directory uses Git to synchronize your Claude Code configuration across mul
 - **agents/** - Custom agent definitions
 - **skills/** - Custom skill definitions
 - **commands/** - Custom command definitions
+- **hookify.multi-agent.local.md** - Hookify rules for multi-agent parallelization preferences
 - **plugins/installed_plugins.json** - Plugin manifest with versions
 - **plugins/known_marketplaces.json** - Marketplace registry
 - **ide/** - IDE configuration files
@@ -24,6 +25,20 @@ This directory uses Git to synchronize your Claude Code configuration across mul
 - **cache/**, **debug/**, **telemetry/** - Generated diagnostics
 - **todos/** - Local to-do items
 - **piper-voices/** - Large voice files
+
+## Multi-Agent Preferences (Auto-Deployed)
+
+Your Claude Code preferences are configured to encourage multi-agent parallelization:
+
+**File**: `hookify.multi-agent.local.md`
+
+This hookify rule automatically activates on every interaction and reminds Claude to:
+- Use multi-agent execution for independent tasks
+- Parallelize operations whenever possible
+- Route to specialized agents (code-reviewer, security-expert, etc.)
+- Track progress with TodoWrite for complex tasks
+
+**These preferences are automatically deployed to all new hosts** via the bootstrap script.
 
 ## Initial Setup on First Host
 

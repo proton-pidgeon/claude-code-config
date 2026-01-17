@@ -4,7 +4,14 @@
 
 Repository: `https://github.com/proton-pidgeon/claude-code-config`
 Status: **PRIVATE** (secure for conversation history)
-Synced files: **60 files** including settings, history, agents, skills, commands
+Synced files: **62 files** including settings, history, agents, skills, commands, preferences
+
+### Key Features Synced
+✓ Multi-agent parallelization preferences (hookify rule)
+✓ 7 custom agents
+✓ Custom skills and commands
+✓ Conversation history
+✓ Global settings and permissions
 
 ---
 
@@ -57,6 +64,7 @@ claude auth login
 - `agents/` - Your custom agents
 - `skills/` - Your custom skills
 - `commands/` - Your custom commands
+- `hookify.multi-agent.local.md` - Multi-agent parallelization preferences
 - Plugin manifests
 
 ❌ **NOT Synced** (host-specific or sensitive)
