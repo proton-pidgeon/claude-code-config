@@ -380,13 +380,13 @@ function Bootstrap-ClaudeConfig {
     $AvailableAgents = Get-AvailableItems -DirectoryPath (Join-Path $ClaudeConfigDir "agents")
     $AvailableSkills = Get-AvailableSkills -DirectoryPath (Join-Path $ClaudeConfigDir "skills")
     $AvailableCommandsSC = Get-AvailableItems -DirectoryPath (Join-Path $ClaudeConfigDir "commands\sc")
-    $AvailableCommandsPrototype = Get-AvailableItems -DirectoryPath (Join-Path $ClaudeConfigDir "commands\prototype")
+    $AvailableCommandsPrototype = Get-AvailableItems -DirectoryPath (Join-Path $ClaudeConfigDir "commands\kd-prototype")
 
     # Get user selections
     $SelectedAgents = Select-CategoryItems -Category "Agents" -Items $AvailableAgents
     $SelectedSkills = Select-CategoryItems -Category "Skills" -Items $AvailableSkills
     $SelectedCommandsSC = Select-CategoryItems -Category "SuperClaude Commands (sc)" -Items $AvailableCommandsSC
-    $SelectedCommandsPrototype = Select-CategoryItems -Category "Prototype Commands" -Items $AvailableCommandsPrototype
+    $SelectedCommandsPrototype = Select-CategoryItems -Category "kd:prototype Commands" -Items $AvailableCommandsPrototype
 
     # Backup the entire cloned repo for source files
     $TempCloneDir = Join-Path $env:TEMP "claude-clone-backup-$(Get-Random)"
@@ -399,7 +399,7 @@ function Bootstrap-ClaudeConfig {
         (Join-Path $ClaudeConfigDir "agents"),
         (Join-Path $ClaudeConfigDir "skills"),
         (Join-Path $ClaudeConfigDir "commands\sc"),
-        (Join-Path $ClaudeConfigDir "commands\prototype"),
+        (Join-Path $ClaudeConfigDir "commands\kd-prototype"),
         (Join-Path $ClaudeConfigDir "plugins"),
         (Join-Path $ClaudeConfigDir "ide")
     )
@@ -410,9 +410,9 @@ function Bootstrap-ClaudeConfig {
     # Remove all existing items from cloned repo (we'll install selected ones)
     Remove-Item -Path (Join-Path $ClaudeConfigDir "agents\*.md") -ErrorAction SilentlyContinue
     Remove-Item -Path (Join-Path $ClaudeConfigDir "skills\*.md") -ErrorAction SilentlyContinue
-    Remove-Item -Path (Join-Path $ClaudeConfigDir "skills\*") -Directory -ErrorAction SilentlyContinue
+    Get-ChildItem -Path (Join-Path $ClaudeConfigDir "skills") -Directory -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item -Path (Join-Path $ClaudeConfigDir "commands\sc\*.md") -ErrorAction SilentlyContinue
-    Remove-Item -Path (Join-Path $ClaudeConfigDir "commands\prototype\*.md") -ErrorAction SilentlyContinue
+    Remove-Item -Path (Join-Path $ClaudeConfigDir "commands\kd-prototype\*.md") -ErrorAction SilentlyContinue
 
     # Install selected agents
     if ($SelectedAgents.Count -gt 0) {
@@ -458,12 +458,12 @@ function Bootstrap-ClaudeConfig {
         }
     }
 
-    # Install selected Prototype commands
+    # Install selected kd:prototype commands
     if ($SelectedCommandsPrototype.Count -gt 0) {
-        Write-ColorOutput "Installing Prototype commands:" "Green"
+        Write-ColorOutput "Installing kd:prototype commands:" "Green"
         foreach ($cmd in $SelectedCommandsPrototype) {
-            $sourceFile = Join-Path $TempCloneDir "commands\prototype" $cmd.FileName
-            Copy-Item -Path $sourceFile -Destination (Join-Path $ClaudeConfigDir "commands\prototype") -ErrorAction SilentlyContinue
+            $sourceFile = Join-Path $TempCloneDir "commands\kd-prototype" $cmd.FileName
+            Copy-Item -Path $sourceFile -Destination (Join-Path $ClaudeConfigDir "commands\kd-prototype") -ErrorAction SilentlyContinue
             Write-ColorOutput "  ✓ $($cmd.Name)" "Green"
         }
     }

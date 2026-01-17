@@ -374,7 +374,7 @@ declare -a AVAILABLE_COMMANDS_PROTOTYPE=()
 parse_items "$CLAUDE_CONFIG_DIR/agents" AVAILABLE_AGENTS
 parse_skills "$CLAUDE_CONFIG_DIR/skills" AVAILABLE_SKILLS
 parse_items "$CLAUDE_CONFIG_DIR/commands/sc" AVAILABLE_COMMANDS_SC
-parse_items "$CLAUDE_CONFIG_DIR/commands/prototype" AVAILABLE_COMMANDS_PROTOTYPE
+parse_items "$CLAUDE_CONFIG_DIR/commands/kd-prototype" AVAILABLE_COMMANDS_PROTOTYPE
 
 # Get user selections
 declare -a SELECTED_AGENTS=()
@@ -385,7 +385,7 @@ declare -a SELECTED_COMMANDS_PROTOTYPE=()
 select_category_items "Agents" "$CLAUDE_CONFIG_DIR/agents" AVAILABLE_AGENTS SELECTED_AGENTS
 select_category_items "Skills" "$CLAUDE_CONFIG_DIR/skills" AVAILABLE_SKILLS SELECTED_SKILLS
 select_category_items "SuperClaude Commands (sc)" "$CLAUDE_CONFIG_DIR/commands/sc" AVAILABLE_COMMANDS_SC SELECTED_COMMANDS_SC
-select_category_items "Prototype Commands" "$CLAUDE_CONFIG_DIR/commands/prototype" AVAILABLE_COMMANDS_PROTOTYPE SELECTED_COMMANDS_PROTOTYPE
+select_category_items "kd:prototype Commands" "$CLAUDE_CONFIG_DIR/commands/kd-prototype" AVAILABLE_COMMANDS_PROTOTYPE SELECTED_COMMANDS_PROTOTYPE
 
 # Backup the entire cloned repo for source files
 TEMP_CLONE_DIR="/tmp/claude-clone-backup-$$"
@@ -397,7 +397,7 @@ echo -e "${BLUE}Installing selected items...${NC}"
 mkdir -p "$CLAUDE_CONFIG_DIR/agents"
 mkdir -p "$CLAUDE_CONFIG_DIR/skills"
 mkdir -p "$CLAUDE_CONFIG_DIR/commands/sc"
-mkdir -p "$CLAUDE_CONFIG_DIR/commands/prototype"
+mkdir -p "$CLAUDE_CONFIG_DIR/commands/kd-prototype"
 mkdir -p "$CLAUDE_CONFIG_DIR/plugins"
 mkdir -p "$CLAUDE_CONFIG_DIR/ide"
 
@@ -406,7 +406,7 @@ rm -rf "$CLAUDE_CONFIG_DIR/agents"/*.md
 rm -rf "$CLAUDE_CONFIG_DIR/skills"/*.md
 rm -rf "$CLAUDE_CONFIG_DIR/skills"/*/ 2>/dev/null || true
 rm -rf "$CLAUDE_CONFIG_DIR/commands/sc"/*.md
-rm -rf "$CLAUDE_CONFIG_DIR/commands/prototype"/*.md
+rm -rf "$CLAUDE_CONFIG_DIR/commands/kd-prototype"/*.md
 
 # Install selected agents
 if [ ${#SELECTED_AGENTS[@]} -gt 0 ]; then
@@ -458,15 +458,15 @@ if [ ${#SELECTED_COMMANDS_SC[@]} -gt 0 ]; then
   done
 fi
 
-# Install selected Prototype commands
+# Install selected kd:prototype commands
 if [ ${#SELECTED_COMMANDS_PROTOTYPE[@]} -gt 0 ]; then
-  echo -e "${GREEN}Installing Prototype commands:${NC}"
+  echo -e "${GREEN}Installing kd:prototype commands:${NC}"
   for item in "${SELECTED_COMMANDS_PROTOTYPE[@]}"; do
     local name=$(echo "$item" | cut -d':' -f1)
     local file=$(echo "$item" | cut -d':' -f2)
-    local source_file="$TEMP_CLONE_DIR/commands/prototype/$file"
+    local source_file="$TEMP_CLONE_DIR/commands/kd-prototype/$file"
     if [ -f "$source_file" ]; then
-      cp "$source_file" "$CLAUDE_CONFIG_DIR/commands/prototype/"
+      cp "$source_file" "$CLAUDE_CONFIG_DIR/commands/kd-prototype/"
       echo -e "${GREEN}  ✓ $name${NC}"
     fi
   done
