@@ -468,20 +468,8 @@ function Bootstrap-ClaudeConfig {
         }
     }
 
-    # Cleanup temporary backup
-    Remove-Item -Path $TempCloneDir -Recurse -Force -ErrorAction SilentlyContinue
-
-    Write-ColorOutput "✓ Items installed" "Green"
-
-    # Step 5b: Generate plugin installation script
-    $pluginsJsonPath = Join-Path $env:TEMP "claude-clone-backup-*\plugins\installed_plugins.json"
-    if (Test-Path (Split-Path $pluginsJsonPath) -ErrorAction SilentlyContinue) {
-        $pluginsJsonPath = Get-ChildItem (Split-Path $pluginsJsonPath) -Filter "installed_plugins.json" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
-    }
-
-    if (-not $pluginsJsonPath) {
-        $pluginsJsonPath = Join-Path (Join-Path $ClaudeConfigDir "plugins") "installed_plugins.json"
-    }
+    # Step 5b: Generate plugin installation script (before cleanup)
+    $pluginsJsonPath = Join-Path (Join-Path $TempCloneDir "plugins") "installed_plugins.json"
 
     if (Test-Path $pluginsJsonPath) {
         $pluginInstallScript = Join-Path $ClaudeConfigDir "install-plugins.ps1"
@@ -514,6 +502,11 @@ catch {
         Set-Content -Path $pluginInstallScript -Value $scriptContent
         Write-ColorOutput "✓ Generated plugin installation script" "Green"
     }
+
+    # Cleanup temporary backup
+    Remove-Item -Path $TempCloneDir -Recurse -Force -ErrorAction SilentlyContinue
+
+    Write-ColorOutput "✓ Items installed" "Green"
 
     # Step 6: Verify Git setup
     Write-Host ""

@@ -472,20 +472,10 @@ if [ ${#SELECTED_COMMANDS_PROTOTYPE[@]} -gt 0 ]; then
   done
 fi
 
-# Cleanup temporary backup
-rm -rf "$TEMP_CLONE_DIR"
-
-echo -e "${GREEN}✓ Items installed${NC}"
-
-# Step 5b: Generate plugin installation script
-if [ -f "$TEMP_CLONE_DIR/plugins/installed_plugins.json" ] 2>/dev/null || [ -f "$CLAUDE_CONFIG_DIR/../plugins/installed_plugins.json" ]; then
-  PLUGINS_FILE=""
-  [ -f "$TEMP_CLONE_DIR/plugins/installed_plugins.json" ] && PLUGINS_FILE="$TEMP_CLONE_DIR/plugins/installed_plugins.json"
-  [ -f "$CLAUDE_CONFIG_DIR/../plugins/installed_plugins.json" ] && PLUGINS_FILE="$CLAUDE_CONFIG_DIR/../plugins/installed_plugins.json"
-
-  if [ -n "$PLUGINS_FILE" ]; then
-    PLUGIN_INSTALL_SCRIPT="$CLAUDE_CONFIG_DIR/install-plugins.sh"
-    cat > "$PLUGIN_INSTALL_SCRIPT" << 'EOF'
+# Step 5b: Generate plugin installation script (before cleanup)
+if [ -f "$TEMP_CLONE_DIR/plugins/installed_plugins.json" ]; then
+  PLUGIN_INSTALL_SCRIPT="$CLAUDE_CONFIG_DIR/install-plugins.sh"
+  cat > "$PLUGIN_INSTALL_SCRIPT" << 'EOF'
 #!/bin/bash
 # Install Claude plugins
 # Run this after: claude auth login
@@ -513,10 +503,14 @@ else
   echo "  claude plugin install superpowers@claude-plugins-official"
 fi
 EOF
-    chmod +x "$PLUGIN_INSTALL_SCRIPT"
-    echo -e "${GREEN}✓ Generated plugin installation script${NC}"
-  fi
+  chmod +x "$PLUGIN_INSTALL_SCRIPT"
+  echo -e "${GREEN}✓ Generated plugin installation script${NC}"
 fi
+
+# Cleanup temporary backup
+rm -rf "$TEMP_CLONE_DIR"
+
+echo -e "${GREEN}✓ Items installed${NC}"
 
 # Step 6: Verify Git setup
 echo ""
