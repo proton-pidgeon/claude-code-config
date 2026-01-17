@@ -477,6 +477,47 @@ rm -rf "$TEMP_CLONE_DIR"
 
 echo -e "${GREEN}✓ Items installed${NC}"
 
+# Step 5b: Generate plugin installation script
+if [ -f "$TEMP_CLONE_DIR/plugins/installed_plugins.json" ] 2>/dev/null || [ -f "$CLAUDE_CONFIG_DIR/../plugins/installed_plugins.json" ]; then
+  PLUGINS_FILE=""
+  [ -f "$TEMP_CLONE_DIR/plugins/installed_plugins.json" ] && PLUGINS_FILE="$TEMP_CLONE_DIR/plugins/installed_plugins.json"
+  [ -f "$CLAUDE_CONFIG_DIR/../plugins/installed_plugins.json" ] && PLUGINS_FILE="$CLAUDE_CONFIG_DIR/../plugins/installed_plugins.json"
+
+  if [ -n "$PLUGINS_FILE" ]; then
+    PLUGIN_INSTALL_SCRIPT="$CLAUDE_CONFIG_DIR/install-plugins.sh"
+    cat > "$PLUGIN_INSTALL_SCRIPT" << 'EOF'
+#!/bin/bash
+# Install Claude plugins
+# Run this after: claude auth login
+
+set -e
+
+echo "Installing Claude plugins..."
+echo ""
+
+# Extract and install plugins from installed_plugins.json
+if command -v jq &> /dev/null; then
+  plugins=$(jq -r '.plugins | to_entries[] | .key' "$HOME/.claude/plugins/installed_plugins.json" 2>/dev/null || echo "")
+  for plugin in $plugins; do
+    echo "Installing: $plugin"
+    claude plugin install "$plugin"
+  done
+  echo ""
+  echo "✓ All plugins installed successfully"
+else
+  # Fallback if jq is not available
+  echo "jq not found. Please install plugins manually:"
+  echo ""
+  echo "  claude plugin install episodic-memory@superpowers-marketplace"
+  echo "  claude plugin install hookify@claude-plugins-official"
+  echo "  claude plugin install superpowers@claude-plugins-official"
+fi
+EOF
+    chmod +x "$PLUGIN_INSTALL_SCRIPT"
+    echo -e "${GREEN}✓ Generated plugin installation script${NC}"
+  fi
+fi
+
 # Step 6: Verify Git setup
 echo ""
 echo -e "${BLUE}Verifying Git configuration...${NC}"
@@ -514,7 +555,10 @@ echo ""
 echo "2. Authenticate with Claude:"
 echo "   claude auth login"
 echo ""
-echo "3. Verify your installation:"
+echo "3. Install plugins (if generated):"
+echo "   $CLAUDE_CONFIG_DIR/install-plugins.sh"
+echo ""
+echo "4. Verify your installation:"
 echo "   cd $CLAUDE_CONFIG_DIR"
 echo "   git status"
 echo ""

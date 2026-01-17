@@ -473,6 +473,48 @@ function Bootstrap-ClaudeConfig {
 
     Write-ColorOutput "✓ Items installed" "Green"
 
+    # Step 5b: Generate plugin installation script
+    $pluginsJsonPath = Join-Path $env:TEMP "claude-clone-backup-*\plugins\installed_plugins.json"
+    if (Test-Path (Split-Path $pluginsJsonPath) -ErrorAction SilentlyContinue) {
+        $pluginsJsonPath = Get-ChildItem (Split-Path $pluginsJsonPath) -Filter "installed_plugins.json" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+    }
+
+    if (-not $pluginsJsonPath) {
+        $pluginsJsonPath = Join-Path (Join-Path $ClaudeConfigDir "plugins") "installed_plugins.json"
+    }
+
+    if (Test-Path $pluginsJsonPath) {
+        $pluginInstallScript = Join-Path $ClaudeConfigDir "install-plugins.ps1"
+        $scriptContent = @'
+# Install Claude plugins
+# Run this after: claude auth login
+
+Write-Host "Installing Claude plugins..." -ForegroundColor Green
+Write-Host ""
+
+try {
+    $pluginsJson = Get-Content "$HOME\.claude\plugins\installed_plugins.json" -ErrorAction SilentlyContinue | ConvertFrom-Json
+    $plugins = $pluginsJson.plugins.psobject.properties.name
+
+    foreach ($plugin in $plugins) {
+        Write-Host "Installing: $plugin"
+        claude plugin install $plugin
+    }
+    Write-Host ""
+    Write-Host "✓ All plugins installed successfully" -ForegroundColor Green
+}
+catch {
+    Write-Host "Error reading plugins or jq not available. Please install plugins manually:" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "  claude plugin install episodic-memory@superpowers-marketplace"
+    Write-Host "  claude plugin install hookify@claude-plugins-official"
+    Write-Host "  claude plugin install superpowers@claude-plugins-official"
+}
+'@
+        Set-Content -Path $pluginInstallScript -Value $scriptContent
+        Write-ColorOutput "✓ Generated plugin installation script" "Green"
+    }
+
     # Step 6: Verify Git setup
     Write-Host ""
     Write-ColorOutput "Verifying Git configuration..." "Blue"
@@ -514,7 +556,10 @@ function Bootstrap-ClaudeConfig {
     Write-Host "2. Authenticate with Claude:"
     Write-Host "   claude auth login"
     Write-Host ""
-    Write-Host "3. Verify your installation:"
+    Write-Host "3. Install plugins (if generated):"
+    Write-Host "   & '$ClaudeConfigDir\install-plugins.ps1'"
+    Write-Host ""
+    Write-Host "4. Verify your installation:"
     Write-Host "   cd $ClaudeConfigDir"
     Write-Host "   git status"
     Write-Host ""
