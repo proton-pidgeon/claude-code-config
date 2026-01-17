@@ -4,6 +4,9 @@
 # Cross-platform script to set up Claude Code configuration on a new host
 # Usage: ./bootstrap-claude-config.sh -r <repo_url>
 # Example: ./bootstrap-claude-config.sh -r "git@github.com:username/claude-code-config.git"
+#
+# Remote execution with cache-busting:
+# bash <(curl -fsSL "https://raw.githubusercontent.com/proton-pidgeon/claude-code-config/main/bootstrap-claude-config.sh?t=$(date +%s)") -r "https://github.com/proton-pidgeon/claude-code-config.git"
 
 set -e
 

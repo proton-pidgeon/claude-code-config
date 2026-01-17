@@ -15,8 +15,8 @@
     .\bootstrap-claude-config.ps1 -RepoUrl "https://github.com/username/claude-code-config.git"
 
 .EXAMPLE
-    # Download and execute in one command:
-    iwr -useb https://raw.githubusercontent.com/username/claude-code-config/main/bootstrap-claude-config.ps1 | iex; Bootstrap-ClaudeConfig -RepoUrl "https://github.com/username/claude-code-config.git"
+    # Download and execute in one command (with cache-busting):
+    $timestamp = [DateTimeOffset]::Now.ToUnixTimeSeconds(); iwr -useb "https://raw.githubusercontent.com/username/claude-code-config/main/bootstrap-claude-config.ps1?t=$timestamp" | iex; Bootstrap-ClaudeConfig -RepoUrl "https://github.com/username/claude-code-config.git"
 #>
 
 param(

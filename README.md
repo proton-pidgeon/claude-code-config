@@ -25,7 +25,7 @@ After installation, restart your terminal and verify with: `claude --version`
 One-line command to download and execute the bootstrap script:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/proton-pidgeon/claude-code-config/main/bootstrap-claude-config.sh) -r "https://github.com/proton-pidgeon/claude-code-config.git"
+bash <(curl -fsSL "https://raw.githubusercontent.com/proton-pidgeon/claude-code-config/main/bootstrap-claude-config.sh?t=$(date +%s)") -r "https://github.com/proton-pidgeon/claude-code-config.git"
 ```
 
 ### Windows PowerShell Setup
@@ -33,7 +33,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/proton-pidgeon/claude-code-c
 One-line command to download and execute the bootstrap script:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/proton-pidgeon/claude-code-config/main/bootstrap-claude-config.ps1 | iex; Bootstrap-ClaudeConfig -RepoUrl "https://github.com/proton-pidgeon/claude-code-config.git"
+$timestamp = [DateTimeOffset]::Now.ToUnixTimeSeconds(); iwr -useb "https://raw.githubusercontent.com/proton-pidgeon/claude-code-config/main/bootstrap-claude-config.ps1?t=$timestamp" | iex; Bootstrap-ClaudeConfig -RepoUrl "https://github.com/proton-pidgeon/claude-code-config.git"
 ```
 
 **Note:** You may need to enable script execution first:
